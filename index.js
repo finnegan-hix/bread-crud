@@ -3,6 +3,7 @@ const methodOverride = require('method-override')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const breadController = require('./controllers/bread')
+const bakerController = require('./controllers/baker')
 
 const app = express()
 
@@ -16,6 +17,7 @@ app.engine('jsx', require('express-react-views').createEngine())
 
 //routes
 app.use('/breads', breadController)
+app.use('/baker', bakerController)
 const PORT = process.env.PORT
 
 // db connection

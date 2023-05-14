@@ -1,21 +1,26 @@
 const router = require('express').Router()
 const Bread = require('../models/bread')
 
+const Baker = require('../models/baker')
+
 router.get('/',async  (req, res) => {
     
        const bread = await Bread.find()
+       const bakers = await Baker.find()
     res.render('index', {
-        breads: bread
+        breads: bread,
+        bakers
     })
 })
-router.get('/new' , (req, res) => {
-    res.render('new')
+router.get('/new' , async (req, res) => {
+    const bakers = await Baker.find()
+    res.render('new', { bakers })
 })
 router.get('/:id', async (req, res) => {
     const { id } = req.params
-    const bread = await Bread.findById(id)
+    const bread = await Bread.findById(id).populate('baker')
     res.render('show', {
-        bread,
+        bread
         
     })
    
@@ -26,12 +31,14 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/edit', async (req, res) => {
     const { id } = req.params
     const bread = await Bread.findById(id)
+    const bakers = await Baker.find()
     res.render('edit', {
-        bread
+        bread,
+        bakers
 })
 })
 
-router.post('/:id', async (req,res) => {
+router.put('/:id', async (req,res) => {
     const { id } = req.params
    if (!req.body.image) req.body.image = undefined
     if (req.body.hasGluten === 'on'){
@@ -43,8 +50,8 @@ router.post('/:id', async (req,res) => {
     await Bread.findByIdAndUpdate(id, req.body)
     res.status(303).redirect(`/breads/${id}`)
 })
-router.post('/:id', async (req,res) => {
-    const { id } = req.params
+router.post('/', async (req,res) => {
+   
    if (!req.body.image) req.body.image = undefined
     if (req.body.hasGluten === 'on'){
         req.body.hasGluten = true
@@ -64,23 +71,12 @@ router.delete('/:id',  async (req,res) => {
     res.status(303).redirect('/breads')
 })
 
-//router.put('/:index', (req, res) => {
-  //  const { index } = req.params
-    //if (!req.body.image) req.body.image = 'https://thumbs.dreamstime.com/b/bread-cut-14027607.jpg'
-//
-  //  if (req.body.hasGluten === 'on'){
-    //    req.body.hasGluten = true
-    //} else {
-     //   req.body.hasGluten = false
-    //}
-//Breads[index] = req.body
-//res.status(303).redirect(`/breads/${index}`)
-//})
+
 module.exports = router
 
 
 //database seed
-router.get('data/seed', async (req, res) => {
+router.get('/data/seed', async (req, res) => {
     const data = [
         {
           name: 'Rye',
